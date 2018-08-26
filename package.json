@@ -3,8 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "eosjs": "^16.0.6",
+    "lodash": "^4.17.10",
     "react": "^16.4.2",
+    "react-bootstrap": "^0.32.3",
     "react-dom": "^16.4.2",
+    "react-json-pretty": "^1.7.9",
     "react-scripts": "1.1.5"
   },
   "scripts": {
