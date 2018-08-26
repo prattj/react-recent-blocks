@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import { Button } from 'react-bootstrap'
 import _ from 'lodash'
-import JSONPretty from 'react-json-pretty'
 // import { EosApi } from 'eosjs-api'
 import './App.css';
+import CollapsePanel from './CollapsePanel'
 
 const CONFIG = {
   httpEndpoint: 'https://api.eosnewyork.io',
@@ -13,7 +13,6 @@ const HISTORY = 2
 const FIELDS = [
   'block_num',
   'id',
-  'producer',
   'timestamp',
 ]
 
@@ -34,9 +33,12 @@ class App extends Component {
     const headBlockNum = (await eos.getInfo({})).head_block_num
     for (let i = headBlockNum; i > (headBlockNum-HISTORY); i--) {
       // NOTE: getBlock() - Fetch a (single) block from the blockchain
-      const block = _.pick(await eos.getBlock(i), FIELDS)
-      // const block = await eos.getBlock(i)
-      recent.push({ ...block, actionCnt: _.size(block.transactions) })
+      const block = await eos.getBlock(i)
+      recent.push({
+        ...(_.pick(block, FIELDS)),
+        action_cnt: _.size(block.transactions),
+        raw: block,
+      })
     }
     this.setState({ recent, headBlockNum })
   }
@@ -62,13 +64,12 @@ class App extends Component {
         <hr />
 
         <Button id='load-button' onClick={this.handleClick}>
-          LOAD
+          {`LOAD (${HISTORY})`}
         </Button>
-        <p>{`Block HISTORY list length : ${HISTORY}`}</p>
-        { headBlockNum && <p>Most recent block: {headBlockNum}</p> }
-        { !_.isEmpty(recent) && <JSONPretty id="on-load" json={recent}></JSONPretty> }
+        { headBlockNum && ` -- Most recent block: ${headBlockNum}` }
+        <CollapsePanel data={recent} />
       </div>
-    );
+    )
   }
 }
 
