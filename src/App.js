@@ -20,17 +20,18 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      headBlockNum: null,
       recent: [],
     }
   }
 
-  async getMostRecentBlocks() {
+  async fetchRecentBlocks() {
     const recent = []
     const EosApi = require('eosjs-api')
     const eos = EosApi(CONFIG)
     // NOTE: getInfo() - Fetch most recent block from the blockchain
     const headBlockNum = (await eos.getInfo({})).head_block_num
+    // TODO: remove console log
+    console.log('most recent block number: ', headBlockNum)
     for (let i = headBlockNum; i > (headBlockNum-HISTORY); i--) {
       // NOTE: getBlock() - Fetch a (single) block from the blockchain
       const block = await eos.getBlock(i)
@@ -40,19 +41,19 @@ class App extends Component {
         raw: block,
       })
     }
-    this.setState({ recent, headBlockNum })
+    this.setState({ recent })
   }
 
   async componentDidMount() {
-    this.getMostRecentBlocks()
+    this.fetchRecentBlocks()
   }
 
   handleClick = async () => {
-    this.getMostRecentBlocks()
+    this.fetchRecentBlocks()
   }
 
   render() {
-    const { recent, headBlockNum } = this.state
+    const { recent } = this.state
     return (
       <div className="App">
         <h1>React Application to pull the most recent blocks</h1>
@@ -63,10 +64,7 @@ class App extends Component {
         </ul>
         <hr />
 
-        <Button id='load-button' onClick={this.handleClick}>
-          {`LOAD (${HISTORY})`}
-        </Button>
-        { headBlockNum && ` -- Most recent block: ${headBlockNum}` }
+        <Button id='load-button' children={`LOAD (${HISTORY})`} onClick={this.handleClick} />
         <CollapsePanel data={recent} />
       </div>
     )
