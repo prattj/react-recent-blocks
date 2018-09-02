@@ -1,9 +1,67 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
+jest.mock('./services/blockInfo')
+jest.mock('./services/headBlockNum')
 
-it('renders without crashing', () => {
-  const div = document.createElement('div');
-  ReactDOM.render(<App />, div);
-  ReactDOM.unmountComponentAtNode(div);
-});
+import React from 'react'
+import { shallow, mount } from 'enzyme'
+import { Button } from 'react-bootstrap'
+import CollapsePanel from './CollapsePanel'
+import App from './App'
+
+describe('App component', () => {
+
+  it('should render', () => {
+    const IS_LOADING = false
+    const BLOCKS = [{ contains: 'data' }]
+    const wrapper = shallow(<App />)
+    wrapper.setState({ isLoading: IS_LOADING, blocks: BLOCKS })
+    expect(wrapper.find(Button).props().disabled).toBe(IS_LOADING)
+    expect(wrapper.find(CollapsePanel).props().blocks).toEqual(BLOCKS)
+  })
+
+  it('should render when loading', () => {
+    const IS_LOADING = true
+    const wrapper = shallow(<App />)
+    wrapper.setState({ isLoading: IS_LOADING })
+    expect(wrapper.find(Button).props().disabled).toBe(IS_LOADING)
+    expect(wrapper.find('p').props().children).toEqual('Loading...')
+    expect(wrapper.find(CollapsePanel).exists()).toBe(false)
+  })
+
+  it('test button click', () => {
+    const wrapper = shallow(<App />)
+    const spy = jest.spyOn(wrapper.instance(), 'fetchRecentBlocks')
+    wrapper.find(Button).simulate('click')
+    expect(spy).toHaveBeenCalledTimes(1)
+  })
+
+  it('state should be set', (done) => {
+    const BLOCK_INFO = {
+      action_cnt: '1',
+      block_num: 10000001,
+      id: 'uuid-1',
+      raw: { id: 'uuid-1', more: 'fields' },
+      timestamp: 'some-timestamp',
+    }
+    const wrapper = mount(<App />)
+    setImmediate(() => {
+      expect(wrapper.state().isLoading).toBe(false)
+      expect(wrapper.state().blocks).toContainEqual(BLOCK_INFO)
+      wrapper.unmount()
+      done()
+    })
+  })
+
+  xit('fetchRecentBlocks should be called once', (done) => {
+    const wrapper = mount(<App />)
+    const spy = jest.spyOn(wrapper.instance(), 'fetchRecentBlocks')
+    expect(spy).toHaveBeenCalledTimes(1)
+    wrapper.unmount()
+  })
+
+  xit('componentWillUnmount should be called on unmount', async () => {
+    const wrapper = mount(<App />)
+    const spy = jest.spyOn(wrapper.instance(), 'componentWillUnmount')
+    wrapper.unmount()
+    expect(spy).toHaveBeenCalled()
+  })
+})

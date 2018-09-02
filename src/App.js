@@ -1,74 +1,58 @@
 import React, { Component } from 'react'
 import { Button } from 'react-bootstrap'
-import _ from 'lodash'
-// import { EosApi } from 'eosjs-api'
-import './App.css';
+import { v1 } from 'uuid'
 import CollapsePanel from './CollapsePanel'
-
-const CONFIG = {
-  httpEndpoint: 'https://api.eosnewyork.io',
-  chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
-}
-const HISTORY = 2
-const FIELDS = [
-  'block_num',
-  'id',
-  'timestamp',
-]
+import './App.css'
+import { HISTORY } from './constants'
+import HeadBlockNum from './services/headBlockNum'
+import BlockInfo from './services/blockInfo'
 
 class App extends Component {
-  constructor() {
-    super()
-    this.state = {
-      recent: [],
+  _currentId = null
+
+  state = {
+    isLoading: false,
+    blocks: [],
+  }
+
+  componentDidMount() {
+    this.handleFetch()
+  }
+
+  componentWillUnmount() {
+    this._currentId = null
+  }
+
+  handleFetch = () => {
+    this.fetchRecentBlocks(v1())
+  }
+
+  fetchRecentBlocks = async (id) => {
+    if (id !== this._currentId) {
+      this._currentId = id
+      this.setState({ isLoading: true })
+      const blockNum = await HeadBlockNum()
+      let blocks = []
+      for (let blockId = blockNum; blockId > (blockNum-HISTORY); blockId--) {
+        blocks.push(await BlockInfo(blockId))
+      }
+      if (this._currentId === id) {
+        this.setState({ isLoading: false, blocks })
+      }
     }
-  }
-
-  async fetchRecentBlocks() {
-    const recent = []
-    const EosApi = require('eosjs-api')
-    const eos = EosApi(CONFIG)
-    // NOTE: getInfo() - Fetch most recent block from the blockchain
-    const headBlockNum = (await eos.getInfo({})).head_block_num
-    // TODO: remove console log
-    console.log('most recent block number: ', headBlockNum)
-    for (let i = headBlockNum; i > (headBlockNum-HISTORY); i--) {
-      // NOTE: getBlock() - Fetch a (single) block from the blockchain
-      const block = await eos.getBlock(i)
-      recent.push({
-        ...(_.pick(block, FIELDS)),
-        action_cnt: _.size(block.transactions),
-        raw: block,
-      })
-    }
-    this.setState({ recent })
-  }
-
-  async componentDidMount() {
-    this.fetchRecentBlocks()
-  }
-
-  handleClick = async () => {
-    this.fetchRecentBlocks()
   }
 
   render() {
-    const { recent } = this.state
+    const { isLoading, blocks } = this.state
     return (
       <div className="App">
-        <h1>React Application to pull the most recent blocks</h1>
-        <ul>
-          <li>Page should update with the click of a “LOAD” button.  We should only show 10 most recent blocks, older blocks should dropped from the list when you hit load again.</li>
-          <li>Block list entries should show the hash of the block (this is the id), it’s timestamp, and the count of actions included in that block (this will typically be 0)</li>
-          <li>Clicking a block entry should expand that line to show the raw contents of the block output.</li>
-        </ul>
+        <Button id='load-button' children={`LOAD (${HISTORY})`}
+            onClick={this.handleFetch} disabled={isLoading} />
         <hr />
-
-        <Button id='load-button' children={`LOAD (${HISTORY})`} onClick={this.handleClick} />
-        <CollapsePanel data={recent} />
+        { !isLoading ? <CollapsePanel blocks={blocks} /> : <p>Loading...</p> }
       </div>
     )
   }
 }
 
-export default App;
+export default App

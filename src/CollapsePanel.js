@@ -1,16 +1,17 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { Panel } from 'react-bootstrap'
 import JSONPretty from 'react-json-pretty'
 import _ from 'lodash'
 
-export default function CollapsePanel({data}) {
-  return _.map(data, (block) => {
+export default function CollapsePanel({ blocks }) {
+  return _.map(blocks, (block) => {
     const { block_num, id, timestamp, action_cnt, raw } = block
     return (
       <Panel id={`collapsible-panel-${block_num}`} key={block_num}>
         <Panel.Heading>
           <Panel.Title toggle>
-            {`timestamp: ${timestamp}`}<br />{`id: ${id}`}<br/>{`action_cnt: ${action_cnt}`}
+            {`id: ${id}`}<br/>{`timestamp: ${timestamp}`}<br />{`action_cnt: ${action_cnt}`}
           </Panel.Title>
         </Panel.Heading>
         <Panel.Collapse>
@@ -21,4 +22,8 @@ export default function CollapsePanel({data}) {
       </Panel>
     )
   })
+}
+
+CollapsePanel.propTypes = {
+  blocks: PropTypes.arrayOf(PropTypes.object).isRequired
 }
