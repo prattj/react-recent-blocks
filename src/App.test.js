@@ -34,31 +34,7 @@ describe('App component', () => {
     expect(spy).toHaveBeenCalledTimes(1)
   })
 
-  it('state should be set', (done) => {
-    const BLOCK_INFO = {
-      action_cnt: '1',
-      block_num: 10000001,
-      id: 'uuid-1',
-      raw: { id: 'uuid-1', more: 'fields' },
-      timestamp: 'some-timestamp',
-    }
-    const wrapper = mount(<App />)
-    setImmediate(() => {
-      expect(wrapper.state().isLoading).toBe(false)
-      expect(wrapper.state().blocks).toContainEqual(BLOCK_INFO)
-      wrapper.unmount()
-      done()
-    })
-  })
-
-  xit('fetchRecentBlocks should be called once', (done) => {
-    const wrapper = mount(<App />)
-    const spy = jest.spyOn(wrapper.instance(), 'fetchRecentBlocks')
-    expect(spy).toHaveBeenCalledTimes(1)
-    wrapper.unmount()
-  })
-
-  xit('componentWillUnmount should be called on unmount', async () => {
+  it('componentWillUnmount should be called on unmount', async () => {
     const wrapper = mount(<App />)
     const spy = jest.spyOn(wrapper.instance(), 'componentWillUnmount')
     wrapper.unmount()
