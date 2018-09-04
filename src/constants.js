@@ -9,4 +9,4 @@ export const FIELDS = [
   'timestamp',
 ]
 
-export const HISTORY = 2
+export const HISTORY = 10
