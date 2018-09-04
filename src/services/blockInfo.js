@@ -1,4 +1,4 @@
-import EosApi from 'eosjs-api';
+import EosApi from 'eosjs-api'
 import _ from 'lodash'
 import { CONFIG, FIELDS } from '../constants'
 

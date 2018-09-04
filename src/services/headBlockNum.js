@@ -1,4 +1,4 @@
-import EosApi from 'eosjs-api';
+import EosApi from 'eosjs-api'
 import { CONFIG } from '../constants'
 
 export default async () => {

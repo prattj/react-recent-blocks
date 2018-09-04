@@ -10,6 +10,6 @@ it('returns block info', async () => {
     raw: { id: 'uuid-2', more: 'fields' },
     timestamp: 'more-timestamp',
   }
-  expect.assertions(1);
-  expect(await blockInfo('10000002')).toEqual(EXPECTED_VALUE);
+  expect.assertions(1)
+  expect(await blockInfo('10000002')).toEqual(EXPECTED_VALUE)
 })
